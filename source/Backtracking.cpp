@@ -2,7 +2,7 @@
 #include <limits>
 
 // funcion recursiva de backtracking con podas por optimalidad y factibilidad
-void generar(const Instancia& instancia, int pulso, int ultimoIncluido,
+void generar(const Instancia& instancia, int pulso,
             std::vector<int>& seleccion, double costoParcial,
             double& mejorCosto, std::vector<int>& mejorSeleccion){
     int n = instancia.n();
@@ -35,15 +35,15 @@ void generar(const Instancia& instancia, int pulso, int ultimoIncluido,
 
     // rama 1: probamos no incluir el pulso actual si no es obligatorio
     if(!obligatorio){
-        generar(instancia, pulso + 1, ultimoIncluido, seleccion, costoParcial, mejorCosto, mejorSeleccion);
+        generar(instancia, pulso + 1, seleccion, costoParcial, mejorCosto, mejorSeleccion);
     }
 
-    // calculamos el costo de empalme entre el ultimo pulso que metimos y el actual
-    double costoExtra = (ultimoIncluido == -1) ? 0.0 : instancia.costo(ultimoIncluido, pulso);
+    // calculamos el costo de empalme leyendo el ultimo pulso metido en la seleccion
+    double costoExtra = seleccion.empty() ? 0.0 : instancia.costo(seleccion.back(), pulso);
     seleccion.push_back(pulso);
 
     // rama 2: exploramos metiendo el pulso actual y sumando el costo correspondiente
-    generar(instancia, pulso + 1, pulso, seleccion, costoParcial + costoExtra, mejorCosto, mejorSeleccion);
+    generar(instancia, pulso + 1, seleccion, costoParcial + costoExtra, mejorCosto, mejorSeleccion);
 
     // desarmamos la seleccion para volver al estado anterior
     seleccion.pop_back();
@@ -54,8 +54,8 @@ Solucion Backtracking::resolver(const Instancia& instancia) {
     double mejorCosto = std::numeric_limits<double>::infinity();
     std::vector<int> mejorSeleccion;
 
-    // arrancamos a buscar desde el pulso 1 sin ningun pulso previo elegido y costo acumulado cero
-    generar(instancia, 1, -1, seleccion, 0.0, mejorCosto, mejorSeleccion);
+    // arrancamos a buscar desde el pulso 1 con la seleccion vacia y costo acumulado cero
+    generar(instancia, 1, seleccion, 0.0, mejorCosto, mejorSeleccion);
 
     // armamos la solucion final con los pulsos de la mejor combinacion encontrada
     Solucion solucion;

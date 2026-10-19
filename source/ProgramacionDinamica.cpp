@@ -1,16 +1,17 @@
 #include "ProgramacionDinamica.h"
+#include <cmath>
 #include <limits>
 #include <vector>
 
-// resuelve el problema usando programacion dinamica 
+// resuelve el problema usando programacion dinamica
 Solucion ProgramacionDinamica::resolver(const Instancia& instancia) {
     int n = instancia.n();
     int k = instancia.k();
 
     const double INF = std::numeric_limits<double>::infinity();
 
+    // dp[j][t]: guarda el costo minimo de meter t pulsos terminando en el pulso j
     std::vector<std::vector<double>> dp(n + 1, std::vector<double>(k + 1, INF));
-    std::vector<std::vector<int>> prev(n + 1, std::vector<int>(k + 1, -1));
 
     // caso base: meter solo el pulso 1 como unico elemento cuesta cero
     dp[1][1] = 0.0; 
@@ -25,22 +26,31 @@ Solucion ProgramacionDinamica::resolver(const Instancia& instancia) {
 
                 // costo de enganchar j viniendo desde i
                 double candidato = dp[i][t - 1] + instancia.costo(i, j);
-                // si este enganche es mas barato que lo que teniamos, actualizamos dp y guardamos el predecesor
+                // si este enganche es mas barato que lo que teniamos, actualizamos dp
                 if (candidato < dp[j][t]) {
                     dp[j][t] = candidato;
-                    prev[j][t] = i;
                 }
             }
         }
     }
 
-    // reconstruimos el camino optimo yendo para atras desde el pulso n con k elementos
+    // reconstruimos la solucion optima directo desde la dp yendo para atras
     std::vector<int> seleccion;
-    int j = n, t = k;
-    while (j != -1) {
-        seleccion.push_back(j);
-        j = prev[j][t];
-        t--;
+    int j = n;
+    seleccion.push_back(j);
+
+    // para cada paso t buscamos que pulso previo i dio el optimo
+    for (int t = k; t >= 2; t--) {
+        for (int i = t - 1; i < j; i++) {
+            if (dp[i][t - 1] == INF) continue;
+
+            // si el costo coincide con la transicion, encontramos de donde vino
+            if (dp[j][t] == dp[i][t - 1] + instancia.costo(i, j)) {
+                j = i;
+                seleccion.push_back(j);
+                break;
+            }
+        }
     }
 
     // como fuimos para atras, invertimos la seleccion para que quede en orden y armamos la solucion
