@@ -53,7 +53,6 @@ def resolver_programacion_dinamica(instancia):
 
     # dp[j][t]: costo mínimo usando t pulsos terminando en el pulso j
     dp = [[INF] * (k + 1) for _ in range(n + 1)]
-    prev = [[-1] * (k + 1) for _ in range(n + 1)]
 
     dp[1][1] = 0.0
 
@@ -67,15 +66,18 @@ def resolver_programacion_dinamica(instancia):
                 candidato = dp[i][t - 1] + instancia.costo(i, j)
                 if candidato < dp[j][t]:
                     dp[j][t] = candidato
-                    prev[j][t] = i
 
-    # Reconstrucción de la solución óptima
-    seleccion = []
-    j, t = n, k
-    while j != -1:
-        seleccion.append(j)
-        j = prev[j][t]
-        t -= 1
+    # Reconstrucción de la solución óptima a partir de la matriz dp
+    seleccion = [n]
+    j = n
+    for t in range(k, 1, -1):
+        for i in range(t - 1, j):
+            if dp[i][t - 1] == INF:
+                continue
+            if math.isclose(dp[j][t], dp[i][t - 1] + instancia.costo(i, j), abs_tol=1e-7):
+                j = i
+                seleccion.append(j)
+                break
 
     seleccion.reverse()
     return seleccion, dp[n][k]

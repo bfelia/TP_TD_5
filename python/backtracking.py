@@ -57,10 +57,10 @@ def resolver_backtracking(instancia):
     mejor_seleccion = []
     seleccion = []
 
-    def generar(pulso, ultimo_incluido, costo_parcial):
+    def generar(pulso, costo_parcial):
         nonlocal mejor_costo, mejor_seleccion
 
-        # 1. Poda por optimalidad: si el costo acumulado ya supera o iguala la mejor solución
+        # 1. Poda por optimalidad: si el costo acumulado ya supera o iguala la mejor solucion
         if costo_parcial >= mejor_costo:
             return
 
@@ -71,7 +71,7 @@ def resolver_backtracking(instancia):
                 mejor_seleccion = list(seleccion)
             return
 
-        # 2. Poda por factibilidad: verificar si aún podemos alcanzar exactamente k pulsos
+        # 2. Poda por factibilidad: verificar si aun podemos alcanzar exactamente k pulsos
         faltan = k - len(seleccion)
         restantes = n - pulso + 1
         if faltan < 0 or faltan > restantes:
@@ -81,15 +81,15 @@ def resolver_backtracking(instancia):
 
         # Rama 1: No incluir el pulso actual (si no es obligatorio)
         if not obligatorio:
-            generar(pulso + 1, ultimo_incluido, costo_parcial)
+            generar(pulso + 1, costo_parcial)
 
         # Rama 2: Incluir el pulso actual
-        costo_extra = 0.0 if ultimo_incluido == -1 else instancia.costo(ultimo_incluido, pulso)
+        costo_extra = 0.0 if not seleccion else instancia.costo(seleccion[-1], pulso)
         seleccion.append(pulso)
-        generar(pulso + 1, pulso, costo_parcial + costo_extra)
+        generar(pulso + 1, costo_parcial + costo_extra)
         seleccion.pop()
 
-    generar(1, -1, 0.0)
+    generar(1, 0.0)
     return mejor_seleccion, mejor_costo
 
 
